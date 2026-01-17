@@ -71,8 +71,7 @@ fn main() -> io::Result<()> {
     let mut input: String = String::new();
     io::stdin().read_line(&mut input)?;
 
-    let shift: i8 = input.trim().parse().unwrap();
-    let mut shifted: u8;
+    let shift: u8 = input.trim().parse().unwrap();
 
     //
     // NEED TO HANDLE NEGATIVE SHIFTS HERE
@@ -86,29 +85,16 @@ fn main() -> io::Result<()> {
     // - b'a'
     //
 
-    for c in input_path.chars() {
-        // uppercase
-        if alphabet_upper.contains_key(&c) {
-            // get the value linked to the char
-            if let Some(&pos) = alphabet_upper.get(&c) {
-                shifted = (pos as u8 + shift as u8) % 26;
-                let new_char = (b'A' + shifted) as char;
-                output_data.push(new_char);
-            }
-        }
-        // lowercase
-        else if alphabet.contains_key(&c) {
-            // get the value linked to the char
-            if let Some(&pos) = alphabet.get(&c) {
-                shifted = (pos as u8 + shift as u8) % 26;
-                let new_char = (b'A' + shifted) as char;
-                output_data.push(new_char);
-            }
-        }
-        // all chars that aren't alphabetical (dots, commas, ...)
-        else {
-            output_data.push(c);
-        }
+    for &b in input_path.as_bytes() {
+        let c = match b {
+            // uppercase
+            b'A'..=b'Z' => b'A' + (b - b'A' + shift) % 26,
+            // lowercase
+            b'a'..=b'z' => b'a' + (b - b'a' + shift) % 26,
+            // everything else
+            _ => b,
+        };
+        output_data.push(c as char);
     }
 
     fs::write(output_path, output_data)?;
