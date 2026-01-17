@@ -1,5 +1,4 @@
 use std::char;
-use std::collections::HashMap;
 use std::fs;
 use std::io;
 
@@ -64,20 +63,33 @@ fn main() -> io::Result<()> {
         ('Z', 25),
     ]);
 
+    // file IO
     let input_path: String = fs::read_to_string("data/input.txt")?;
     let output_path: &str = "data/output.txt";
 
+    // CLI IO
     let mut input: String = String::new();
     io::stdin().read_line(&mut input)?;
 
     let shift: i8 = input.trim().parse().unwrap();
     let mut shifted: u8;
 
+    //
+    // NEED TO HANDLE NEGATIVE SHIFTS HERE
+    //
+
     let mut output_data = String::new();
+
+    //
+    // FUTE IMPROVEMENTS:
+    // change from hashmaps to using byte literals
+    // - b'a'
+    //
 
     for c in input_path.chars() {
         // uppercase
         if alphabet_upper.contains_key(&c) {
+            // get the value linked to the char
             if let Some(&pos) = alphabet_upper.get(&c) {
                 shifted = (pos as u8 + shift as u8) % 26;
                 let new_char = (b'A' + shifted) as char;
@@ -86,13 +98,14 @@ fn main() -> io::Result<()> {
         }
         // lowercase
         else if alphabet.contains_key(&c) {
+            // get the value linked to the char
             if let Some(&pos) = alphabet.get(&c) {
                 shifted = (pos as u8 + shift as u8) % 26;
                 let new_char = (b'A' + shifted) as char;
                 output_data.push(new_char);
             }
         }
-        // voor leestekens enzo
+        // all chars that aren't alphabetical (dots, commas, ...)
         else {
             output_data.push(c);
         }
