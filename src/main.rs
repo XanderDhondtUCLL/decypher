@@ -1,6 +1,5 @@
 use std::fs;
 use std::io;
-use std::str::FromStr;
 
 //
 // Function that shifts a byte representing an ASCII character
@@ -92,12 +91,27 @@ fn main() -> io::Result<()> {
         }
     };
 
-    // encypher or decypher depending on chosen operation
-    if operation_input.trim().contains("1") {
-        encypher(input_file, output_path, shift)
-    } else {
-        decypher(input_file, output_path, shift)
-    };
+    // process the operational input wether to
+    // - encypher
+    // - decypher
+    match operation_input.trim() {
+        "1" => match encypher(input_file, output_path, shift) {
+            Ok(n) => n,
+            Err(t) => {
+                eprintln!("{t}");
+            }
+        },
+        "2" => match decypher(input_file, output_path, shift) {
+            Ok(n) => n,
+            Err(t) => {
+                eprintln!("{t}");
+            }
+        },
+        _ => {
+            eprintln!("Invalid operation!");
+            return Ok(());
+        }
+    }
 
     Ok(())
 }
