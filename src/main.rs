@@ -1,5 +1,6 @@
 use std::fs;
 use std::io;
+use std::str::FromStr;
 
 //
 // Function that shifts a byte representing an ASCII character
@@ -33,70 +34,70 @@ fn char_encypher(byte: u8, shift: u8) -> char {
 fn char_decypher(byte: u8, shift: u8) -> char {
     let c = match byte {
         // uppercase
-        b'A'..=b'Z' => b'A' + (byte - b'A' - shift) % 26,
+        b'A'..=b'Z' => b'A' + (byte - b'A' + (26 - shift)) % 26,
         // lowercase
-        b'a'..=b'z' => b'a' + (byte - b'a' - shift) % 26,
+        b'a'..=b'z' => b'a' + (byte - b'a' + (26 - shift)) % 26,
         // everything else
         _ => byte,
     };
     return c as char;
 }
 
+fn encypher(input_file: String, output_path: &str, shift: u8) -> io::Result<()> {
+    // character encyphering
+    // goes over entire input file
+    // destructures byte
+    let mut output_data = String::new();
+    for &byte in input_file.as_bytes() {
+        let encrypted_char = char_encypher(byte, shift);
+        output_data.push(encrypted_char);
+    }
+    fs::write(output_path, output_data)?;
+    Ok(())
+}
+
+fn decypher(input_file: String, output_path: &str, shift: u8) -> io::Result<()> {
+    // character decyphering
+    // goes over entire input file
+    // destructures byte
+    let mut output_data = String::new();
+    for &byte in input_file.as_bytes() {
+        let encrypted_char = char_decypher(byte, shift);
+        output_data.push(encrypted_char);
+    }
+    fs::write(output_path, output_data)?;
+    Ok(())
+}
+
 fn main() -> io::Result<()> {
     // file IO
-    let input_path: String = fs::read_to_string("data/input.txt")?;
+    let input_file: String = fs::read_to_string("data/input.txt")?;
     let output_path: &str = "data/output.txt";
 
-
-
     // CLI IO
-
     println!("encypher (1)\ndecypher (2)");
     let mut operation_input: String = String::new();
     io::stdin().read_line(&mut operation_input)?;
 
-    match operation_input.trim(){
-        "1" => println!("Encypher mode"),
-        "2" => println!("Decypher mode"),
-        _ => println!("test"),
-    }
-
     println!("Shift input by:");
     let mut shift_input: String = String::new();
     io::stdin().read_line(&mut shift_input)?;
-    let mut shift: u8;
 
-    //
-    // ensure that program doesn't panic when alphabetical characters are inputted instead of shift
-    //
-    if shift_input.chars().any(|c| c.is_ascii_alphabetic()) {
-        eprintln!("Can only use numbers to input shift");
-        return Ok(());
-    }
+    // logic that calculates the amount to shift the bytes with
+    let shift = match shift_input.trim().parse::<i32>() {
+        Ok(n) => ((n % 26 + 26) % 26) as u8,
+        Err(_) => {
+            eprint!("shift must be a number");
+            return Ok(()); // break the loop
+        }
+    };
 
-    //
-    // handling of negative shifts
-    // if it starts negatively, since working with u8, do 26 - shift.
-    // Has same effect as taking negative with i8
-    //
-    if shift_input.starts_with("-") {
-        shift_input.remove(0);
-        shift = shift_input.trim().parse().unwrap();
-        shift = 26 - shift;
+    // encypher or decypher depending on chosen operation
+    if operation_input.trim().contains("1") {
+        encypher(input_file, output_path, shift)
     } else {
-        shift = shift_input.trim().parse().unwrap();
-    }
+        decypher(input_file, output_path, shift)
+    };
 
-    let mut output_data = String::new();
-
-    // character encyphering
-    // goes over entire input file
-    // destructures byte
-    for &byte in input_path.as_bytes() {
-        let encrypted_char = char_encypher(byte, shift);
-        output_data.push(encrypted_char);
-    }
-
-    fs::write(output_path, output_data)?;
     Ok(())
 }
