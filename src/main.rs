@@ -1,4 +1,3 @@
-use std::char;
 use std::fs;
 use std::io;
 
@@ -48,15 +47,29 @@ fn main() -> io::Result<()> {
     let input_path: String = fs::read_to_string("data/input.txt")?;
     let output_path: &str = "data/output.txt";
 
+
+
     // CLI IO
-    let mut input: String = String::new();
-    io::stdin().read_line(&mut input)?;
+
+    println!("encypher (1)\ndecypher (2)");
+    let mut operation_input: String = String::new();
+    io::stdin().read_line(&mut operation_input)?;
+
+    match operation_input.trim(){
+        "1" => println!("Encypher mode"),
+        "2" => println!("Decypher mode"),
+        _ => println!("test"),
+    }
+
+    println!("Shift input by:");
+    let mut shift_input: String = String::new();
+    io::stdin().read_line(&mut shift_input)?;
     let mut shift: u8;
 
     //
     // ensure that program doesn't panic when alphabetical characters are inputted instead of shift
     //
-    if input.chars().any(|c| c.is_ascii_alphabetic()) {
+    if shift_input.chars().any(|c| c.is_ascii_alphabetic()) {
         eprintln!("Can only use numbers to input shift");
         return Ok(());
     }
@@ -66,12 +79,12 @@ fn main() -> io::Result<()> {
     // if it starts negatively, since working with u8, do 26 - shift.
     // Has same effect as taking negative with i8
     //
-    if input.starts_with("-") {
-        input.remove(0);
-        shift = input.trim().parse().unwrap();
+    if shift_input.starts_with("-") {
+        shift_input.remove(0);
+        shift = shift_input.trim().parse().unwrap();
         shift = 26 - shift;
     } else {
-        shift = input.trim().parse().unwrap();
+        shift = shift_input.trim().parse().unwrap();
     }
 
     let mut output_data = String::new();
